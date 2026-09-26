@@ -142,10 +142,16 @@ export const MockPaymentGatewayModal: React.FC<MockPaymentGatewayModalProps> = (
     }, 2700);
   };
 
+  const resolvePaymentMethod = (): PaymentMethod => {
+    if (activeTab === 'card') return 'card';
+    if (activeTab === 'wallet') return selectedWallet === 'gcash' ? 'gcash' : 'virtual_wallet';
+    return 'qr_wallet';
+  };
+
   const handleConfirmOrder = () => {
     onPaymentSuccess({
       refNumber,
-      method: activeTab === 'card' ? 'card' : activeTab === 'wallet' ? selectedWallet : 'qr_wallet',
+      method: resolvePaymentMethod(),
       timestamp: transactionTime,
     });
     onClose();

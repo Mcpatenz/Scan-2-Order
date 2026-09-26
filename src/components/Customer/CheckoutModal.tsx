@@ -58,6 +58,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         orderNotes.trim()
       );
 
+      // Blocked (no scanned table / empty cart): the reason is shown via toast.
+      if (!newOrder) {
+        setIsSubmitting(false);
+        return;
+      }
+
       // Trigger Confetti
       try {
         confetti({

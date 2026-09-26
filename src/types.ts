@@ -195,7 +195,7 @@ export interface Employee {
   email: string;
   password: string;
   photo: string; // Image URL or Base64 string
-  role: 'admin' | 'cashier' | 'kitchen';
+  role: 'admin' | 'cashier' | 'kitchen' | 'customer';
   employeeCode: string; // e.g. "EMP-101"
   pinCode?: string;
   scheduledShift?: string;

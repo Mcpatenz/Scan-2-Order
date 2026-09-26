@@ -70,9 +70,9 @@ export const EmployeeSignInModal: React.FC<EmployeeSignInModalProps> = ({ isOpen
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 font-black text-slate-950 shadow-xl shadow-emerald-500/20">
             <LogIn className="h-7 w-7" />
           </div>
-          <h2 className="text-2xl font-black tracking-tight text-white">Employee Sign In</h2>
+          <h2 className="text-2xl font-black tracking-tight text-white">Sign In</h2>
           <p className="text-xs text-slate-400">
-            Sign in to access your role dashboard (Admin, Cashier, or Kitchen)
+            Customers can order with a table QR or an account. Staff are routed to their role dashboard.
           </p>
         </div>
 
@@ -84,37 +84,48 @@ export const EmployeeSignInModal: React.FC<EmployeeSignInModalProps> = ({ isOpen
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-extrabold text-slate-300 mb-1.5">
-              Email or Employee Code
-            </label>
+          <div className="relative">
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
               <input
+                id="employee-sign-in-identity"
                 type="text"
                 required
                 value={emailOrCode}
                 onChange={e => setEmailOrCode(e.target.value)}
-                placeholder="e.g. admin@restaurant.com or EMP-101"
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                placeholder=" "
+                className="peer w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-3.5 text-xs font-bold text-white focus:outline-none focus:border-emerald-500 transition"
               />
+              <label
+                htmlFor="employee-sign-in-identity"
+                className="absolute left-10 top-0 -translate-y-1/2 bg-slate-900 px-1 text-[10px] font-bold text-emerald-400 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-xs peer-placeholder-shown:text-slate-500 peer-focus:top-0 peer-focus:text-[10px] peer-focus:text-emerald-400"
+              >
+                Email or Employee Code
+              </label>
             </div>
+            <p className="mt-1.5 pl-1 text-[10px] text-slate-500">
+              Use your email address or employee code.
+            </p>
           </div>
 
-          <div>
-            <label className="block text-xs font-extrabold text-slate-300 mb-1.5">
-              Password
-            </label>
+          <div className="relative">
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
               <input
+                id="employee-sign-in-password"
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Enter your password..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-10 py-3 text-xs font-mono font-bold text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                placeholder=" "
+                className="peer w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-10 py-3.5 text-xs font-mono font-bold text-white focus:outline-none focus:border-emerald-500 transition"
               />
+              <label
+                htmlFor="employee-sign-in-password"
+                className="absolute left-10 top-0 -translate-y-1/2 bg-slate-900 px-1 text-[10px] font-bold text-emerald-400 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-xs peer-placeholder-shown:text-slate-500 peer-focus:top-0 peer-focus:text-[10px] peer-focus:text-emerald-400"
+              >
+                Password
+              </label>
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -141,7 +152,16 @@ export const EmployeeSignInModal: React.FC<EmployeeSignInModalProps> = ({ isOpen
             <span className="text-[10px] text-slate-500">Click to quick-fill</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleDemoFill('customer@restaurant.com', 'customer123')}
+              className="p-2 bg-slate-900 hover:bg-emerald-950/60 border border-slate-800 hover:border-emerald-500/50 rounded-xl text-left text-[11px] transition"
+            >
+              <div className="font-black text-emerald-400">Customer</div>
+              <div className="text-[10px] text-slate-500 truncate">customer123</div>
+            </button>
+
             <button
               type="button"
               onClick={() => handleDemoFill('admin@restaurant.com', 'admin123')}

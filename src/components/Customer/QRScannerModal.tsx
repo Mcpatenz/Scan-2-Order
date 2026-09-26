@@ -21,7 +21,7 @@ interface QRScannerModalProps {
 }
 
 export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose }) => {
-  const { tables, selectTableByNumber, activeTable, showToast, soundEnabled } = useOrderContext();
+  const { tables, selectTableByNumber, activeTable, showToast, soundEnabled, isTableSelected } = useOrderContext();
 
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -494,12 +494,16 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose 
               <div className="space-y-1.5 pt-2 border-t border-slate-800">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-400">
                   <span>Current Active Table:</span>
-                  <span className="text-emerald-400 font-extrabold">Table #{activeTable.tableNumber}</span>
+                  {isTableSelected ? (
+                    <span className="text-emerald-400 font-extrabold">Table #{activeTable.tableNumber}</span>
+                  ) : (
+                    <span className="text-slate-500 font-extrabold">Not selected yet</span>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1 scrollbar-none">
                   {tables.map(tbl => {
-                    const isCurrent = activeTable.tableNumber === tbl.tableNumber;
+                    const isCurrent = isTableSelected && activeTable.tableNumber === tbl.tableNumber;
 
                     return (
                       <button

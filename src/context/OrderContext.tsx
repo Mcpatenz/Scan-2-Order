@@ -31,6 +31,12 @@ interface OrderContextType {
   setActiveTable: (table: Table) => void;
   selectTableByNumber: (tableNumber: string) => void;
 
+  // Whether the customer has claimed a table by scanning its QR code
+  isTableSelected: boolean;
+  // A scanned table waives the login requirement. Without a scan the customer must
+  // be signed in (any role account) before they can add items to the cart or order.
+  canOrder: boolean;
+
   // Products & Categories
   categories: Category[];
   products: Product[];
@@ -63,7 +69,13 @@ interface OrderContextType {
 
   // Orders
   orders: Order[];
-  placeOrder: (customerName: string, customerPhone: string, diningOption: 'dine_in' | 'takeout', paymentMethod: Order['paymentMethod'], notes?: string) => Order;
+  placeOrder: (
+    customerName: string,
+    customerPhone: string,
+    diningOption: 'dine_in' | 'takeout',
+    paymentMethod: Order['paymentMethod'],
+    notes?: string
+  ) => Order | null;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   updateOrderPaymentStatus: (orderId: string, paymentStatus: PaymentStatus) => void;
   cancelOrder: (orderId: string) => void;
@@ -172,6 +184,23 @@ const INITIAL_EMPLOYEES: Employee[] = [
     pinCode: '9012',
     scheduledShift: '10:00 AM - 08:00 PM',
   },
+  {
+    id: 'cus-201',
+    firstName: 'Jamie',
+    middleName: 'Reyes',
+    lastName: 'Diaz',
+    gender: 'Female',
+    status: 'Active',
+    birthDate: '1995-03-08',
+    address: '88 Harbor Lane, Springfield',
+    contactNumber: '+1 (555) 987-1122',
+    email: 'customer@restaurant.com',
+    password: 'customer123',
+    photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
+    role: 'customer',
+    employeeCode: 'CUS-201',
+    pinCode: '4321',
+  },
 ];
 
 export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -198,14 +227,20 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [activeTable, setActiveTable] = useState<Table>(() => tables[0] || INITIAL_TABLES[0]);
 
+  // A table is only "claimed" once the customer scans its QR code (or follows a ?table= deep link).
+  // Until then the customer stays on the landing page and no table number is shown anywhere.
+  const [isTableSelected, setIsTableSelected] = useState<boolean>(false);
+
   const [orders, setOrders] = useState<Order[]>(() => {
     const saved = localStorage.getItem('qr_app_orders');
     return saved ? JSON.parse(saved) : INITIAL_ORDERS;
   });
 
   // Employee management state
+  // Storage key is versioned: the seed now includes a `customer` role account, and
+  // previously cached lists would not contain it.
   const [employees, setEmployees] = useState<Employee[]>(() => {
-    const saved = localStorage.getItem('qr_app_employees');
+    const saved = localStorage.getItem('qr_app_employees_v2');
     return saved ? JSON.parse(saved) : INITIAL_EMPLOYEES;
   });
 
@@ -215,7 +250,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   useEffect(() => {
-    localStorage.setItem('qr_app_employees', JSON.stringify(employees));
+    localStorage.setItem('qr_app_employees_v2', JSON.stringify(employees));
   }, [employees]);
 
   useEffect(() => {
@@ -528,6 +563,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const found = tables.find(t => t.tableNumber === num || t.id === num);
     if (found) {
       setActiveTable(found);
+      setIsTableSelected(true);
       showToast(`Checked in to Table #${found.tableNumber}`);
     } else {
       showToast(`Table #${num} not found. Showing default Table 1.`);
@@ -613,13 +649,25 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Place order
+  // Requires a scanned table: without one, activeTable is only a placeholder and the
+  // order would be mis-attributed to the default table. Returns null when blocked.
   const placeOrder = (
     customerName: string,
     customerPhone: string,
     diningOption: 'dine_in' | 'takeout',
     paymentMethod: Order['paymentMethod'],
     notes?: string
-  ): Order => {
+  ): Order | null => {
+    if (!isTableSelected) {
+      showToast('⚠️ Please scan your table QR code before placing an order.');
+      return null;
+    }
+
+    if (cart.length === 0) {
+      showToast('⚠️ Your cart is empty.');
+      return null;
+    }
+
     const newOrderNumber = `ORD-${Math.floor(100 + Math.random() * 900)}`;
 
     const orderItems = cart.map(item => ({
@@ -791,6 +839,10 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     orders.find(o => o.tableId === activeTable.id) || null;
 
   const customerOrderHistory = orders.filter(o => o.tableId === activeTable.id);
+
+  // Scanning a table QR waives the login requirement; otherwise the customer must be
+  // signed in before they can add to the cart or place an order.
+  const canOrder = isTableSelected || currentEmployee !== null;
 
   // Products CRUD
   const addProduct = (prodData: Omit<Product, 'id'>) => {
@@ -986,6 +1038,8 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activeTable,
         setActiveTable,
         selectTableByNumber,
+        isTableSelected,
+        canOrder,
         categories,
         products,
         addProduct,

@@ -255,7 +255,7 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
                                 </div>
                                 {item.modifiers && item.modifiers.length > 0 && (
                                   <p className="text-[10px] text-slate-400 truncate">
-                                    {item.modifiers.map(m => m.name).join(', ')}
+                                    {item.modifiers.map(m => m.optionName).join(', ')}
                                   </p>
                                 )}
                               </div>

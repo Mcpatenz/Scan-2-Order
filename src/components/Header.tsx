@@ -9,12 +9,8 @@ import {
   Volume2,
   VolumeX,
   QrCode,
-  Bell,
-  Sparkles,
   LogIn,
   LogOut,
-  UserCheck,
-  Shield,
 } from 'lucide-react';
 import { EmployeeSignInModal } from './Common/EmployeeSignInModal';
 
@@ -29,7 +25,6 @@ export const Header: React.FC = () => {
     selectTableByNumber,
     soundEnabled,
     setSoundEnabled,
-    toastMessage,
     orders,
     waiterRequests,
     currentEmployee,
@@ -210,14 +205,6 @@ export const Header: React.FC = () => {
 
         </div>
       </div>
-
-      {/* Floating Toast Alert Banner */}
-      {toastMessage && (
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-2 text-center text-xs font-bold shadow-lg flex items-center justify-center gap-2 animate-fadeIn">
-          <Sparkles className="h-4 w-4 animate-spin" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
 
       {/* Employee Sign In Modal */}
       <EmployeeSignInModal

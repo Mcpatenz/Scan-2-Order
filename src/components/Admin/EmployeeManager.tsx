@@ -30,7 +30,7 @@ export const EmployeeManager: React.FC = () => {
   const { employees, addEmployee, updateEmployee, deleteEmployee, showToast } = useOrderContext();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'cashier' | 'kitchen'>('all');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'cashier' | 'kitchen' | 'customer'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'Active' | 'Inactive'>('all');
 
   // Modal form state
@@ -49,7 +49,7 @@ export const EmployeeManager: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<'admin' | 'cashier' | 'kitchen'>('cashier');
+  const [role, setRole] = useState<'admin' | 'cashier' | 'kitchen' | 'customer'>('cashier');
   const [employeeCode, setEmployeeCode] = useState('');
   const [photo, setPhoto] = useState('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80');
 
@@ -249,6 +249,12 @@ export const EmployeeManager: React.FC = () => {
             <Utensils className="h-3 w-3 text-amber-400" /> KITCHEN
           </span>
         );
+      case 'customer':
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-0.5 rounded-lg">
+            <User className="h-3 w-3 text-emerald-400" /> CUSTOMER
+          </span>
+        );
     }
   };
 
@@ -297,10 +303,11 @@ export const EmployeeManager: React.FC = () => {
             onChange={e => setRoleFilter(e.target.value as any)}
             className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs font-bold text-white focus:outline-none focus:border-indigo-500"
           >
-            <option value="all">All System Roles (Admin, Cashier, Kitchen)</option>
+            <option value="all">All System Roles (Admin, Cashier, Kitchen, Customer)</option>
             <option value="admin">Admin Only</option>
             <option value="cashier">Cashier POS Only</option>
             <option value="kitchen">Kitchen Staff Only</option>
+            <option value="customer">Customer Only</option>
           </select>
         </div>
 
@@ -644,6 +651,7 @@ export const EmployeeManager: React.FC = () => {
                     <option value="admin">Admin Dashboard</option>
                     <option value="cashier">Cashier POS</option>
                     <option value="kitchen">Kitchen Staff</option>
+                    <option value="customer">Customer</option>
                   </select>
                 </div>
 
