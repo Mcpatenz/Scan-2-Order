@@ -238,7 +238,7 @@ export const AnalyticsDashboard: React.FC = () => {
           </div>
           <p className="text-lg font-black text-white truncate">{topItem ? topItem.name : 'N/A'}</p>
           <p className="text-xs font-extrabold text-amber-400">
-            {topItem ? `${topItem.quantity} Sold • $${topItem.revenue.toFixed(2)}` : 'No data'}
+            {topItem ? `${topItem.quantity} Sold • ₱${topItem.revenue.toFixed(2)}` : 'No data'}
           </p>
         </div>
 
@@ -273,8 +273,8 @@ export const AnalyticsDashboard: React.FC = () => {
               <DollarSign className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-2xl font-black text-emerald-400">${totalRevenueCalculated.toFixed(2)}</p>
-          <p className="text-xs text-slate-400">Avg ${(totalRevenueCalculated / Math.max(1, filteredOrders.length)).toFixed(2)} / order</p>
+          <p className="text-2xl font-black text-emerald-400">₱{totalRevenueCalculated.toFixed(2)}</p>
+          <p className="text-xs text-slate-400">Avg ₱{(totalRevenueCalculated / Math.max(1, filteredOrders.length)).toFixed(2)} / order</p>
         </div>
       </div>
 
@@ -307,7 +307,7 @@ export const AnalyticsDashboard: React.FC = () => {
                   metricType === 'revenue' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Revenue ($)
+                Revenue (₱)
               </button>
             </div>
           </div>
@@ -339,14 +339,14 @@ export const AnalyticsDashboard: React.FC = () => {
                     fontWeight: 'bold',
                   }}
                   formatter={(value: number) =>
-                    metricType === 'revenue' ? [`$${value.toFixed(2)}`, 'Revenue'] : [`${value} Units`, 'Quantity Sold']
+                    metricType === 'revenue' ? [`₱${value.toFixed(2)}`, 'Revenue'] : [`${value} Units`, 'Quantity Sold']
                   }
                 />
                 <Bar
                   dataKey={metricType === 'quantity' ? 'quantity' : 'revenue'}
                   fill="#6366f1"
                   radius={[0, 8, 8, 0]}
-                  name={metricType === 'quantity' ? 'Units Sold' : 'Revenue ($)'}
+                  name={metricType === 'quantity' ? 'Units Sold' : 'Revenue (₱)'}
                 >
                   {itemPopularityData.map((entry, index) => (
                     <Cell
@@ -394,7 +394,7 @@ export const AnalyticsDashboard: React.FC = () => {
                     fontWeight: 'bold',
                   }}
                   formatter={(value: number, name: string) => [
-                    name === 'ordersCount' ? `${value} Orders` : `$${value}`,
+                    name === 'ordersCount' ? `${value} Orders` : `₱${value}`,
                     name === 'ordersCount' ? 'Order Volume' : 'Revenue',
                   ]}
                 />
@@ -503,7 +503,7 @@ export const AnalyticsDashboard: React.FC = () => {
                       </td>
                       <td className="py-2.5 text-slate-400">{categoryObj ? categoryObj.name : 'General'}</td>
                       <td className="py-2.5 text-right font-black text-indigo-400">{item.quantity}</td>
-                      <td className="py-2.5 text-right font-black text-emerald-400">${item.revenue.toFixed(2)}</td>
+                      <td className="py-2.5 text-right font-black text-emerald-400">₱{item.revenue.toFixed(2)}</td>
                       <td className="py-2.5 text-right">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${

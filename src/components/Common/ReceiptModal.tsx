@@ -53,7 +53,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ order, isOpen, onClo
               <div key={idx} className="space-y-0.5">
                 <div className="flex justify-between font-semibold">
                   <span>{item.quantity}x {item.productName}</span>
-                  <span>${item.itemTotal.toFixed(2)}</span>
+                  <span>₱{item.itemTotal.toFixed(2)}</span>
                 </div>
                 {item.modifiers && item.modifiers.length > 0 && (
                   <div className="pl-3 text-[10px] text-slate-500">
@@ -73,21 +73,21 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ order, isOpen, onClo
           <div className="pt-3 space-y-1 text-slate-600 dark:text-slate-400">
             <div className="flex justify-between">
               <span>Subtotal:</span>
-              <span>${order.subtotal.toFixed(2)}</span>
+              <span>₱{order.subtotal.toFixed(2)}</span>
             </div>
             {order.discount > 0 && (
               <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                 <span>Discount:</span>
-                <span>-${order.discount.toFixed(2)}</span>
+                <span>-₱{order.discount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span>Tax (10%):</span>
-              <span>${order.tax.toFixed(2)}</span>
+              <span>₱{order.tax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between pt-2 border-t border-slate-300 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white">
               <span>TOTAL PAID:</span>
-              <span>${order.total.toFixed(2)}</span>
+              <span>₱{order.total.toFixed(2)}</span>
             </div>
           </div>
 

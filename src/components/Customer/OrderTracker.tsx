@@ -300,13 +300,13 @@ export const OrderTracker: React.FC = () => {
           {currentCustomerOrder.items.map((it, i) => (
             <div key={i} className="pt-1.5 flex justify-between text-slate-700 dark:text-slate-300">
               <span>{it.quantity}x {it.productName}</span>
-              <span className="font-semibold">${it.itemTotal.toFixed(2)}</span>
+              <span className="font-semibold">₱{it.itemTotal.toFixed(2)}</span>
             </div>
           ))}
         </div>
         <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between font-extrabold text-slate-900 dark:text-white">
           <span>Total Paid:</span>
-          <span className="text-emerald-600 dark:text-emerald-400">${currentCustomerOrder.total.toFixed(2)}</span>
+          <span className="text-emerald-600 dark:text-emerald-400">₱{currentCustomerOrder.total.toFixed(2)}</span>
         </div>
       </div>
 

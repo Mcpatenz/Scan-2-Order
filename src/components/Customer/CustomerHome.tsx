@@ -309,7 +309,7 @@ export const CustomerHome: React.FC = () => {
                     <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                       <div>
                         <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
-                          ${product.price.toFixed(2)}
+                          ₱{product.price.toFixed(2)}
                         </span>
                         {product.calories && (
                           <span className="ml-2 text-[10px] text-slate-400">
@@ -366,7 +366,7 @@ export const CustomerHome: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 font-black text-sm">
-              <span>${cartSubtotal.toFixed(2)}</span>
+              <span>₱{cartSubtotal.toFixed(2)}</span>
               <ChevronRight className="h-4 w-4" />
             </div>
           </button>

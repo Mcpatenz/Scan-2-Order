@@ -294,7 +294,7 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
             <span className="text-[10px] font-extrabold uppercase text-slate-400">Net Sales Revenue</span>
             <DollarSign className="h-5 w-5 text-emerald-400" />
           </div>
-          <p className="text-3xl font-black text-emerald-400 mt-2">${totalPaidRevenue.toFixed(2)}</p>
+          <p className="text-3xl font-black text-emerald-400 mt-2">₱{totalPaidRevenue.toFixed(2)}</p>
           <p className="text-[10px] text-slate-500 mt-1">{paidOrdersCount} paid transactions in period</p>
         </div>
 
@@ -303,7 +303,7 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
             <span className="text-[10px] font-extrabold uppercase text-slate-400">Average Order Value</span>
             <TrendingUp className="h-5 w-5 text-sky-400" />
           </div>
-          <p className="text-3xl font-black text-sky-400 mt-2">${avgOrderValue.toFixed(2)}</p>
+          <p className="text-3xl font-black text-sky-400 mt-2">₱{avgOrderValue.toFixed(2)}</p>
           <p className="text-[10px] text-slate-500 mt-1">Per paid customer ticket</p>
         </div>
 
@@ -312,7 +312,7 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
             <span className="text-[10px] font-extrabold uppercase text-slate-400">Unpaid Pending Bills</span>
             <Receipt className="h-5 w-5 text-amber-400" />
           </div>
-          <p className="text-3xl font-black text-amber-400 mt-2">${totalUnpaidAmount.toFixed(2)}</p>
+          <p className="text-3xl font-black text-amber-400 mt-2">₱{totalUnpaidAmount.toFixed(2)}</p>
           <p className="text-[10px] text-slate-500 mt-1">Uncollected open bills</p>
         </div>
 
@@ -339,7 +339,7 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
               <Banknote className="h-4 w-4 text-emerald-400" />
               <span className="text-xs font-bold text-slate-200">Cash Payments</span>
             </div>
-            <span className="text-sm font-black text-emerald-400">${cashSales.toFixed(2)}</span>
+            <span className="text-sm font-black text-emerald-400">₱{cashSales.toFixed(2)}</span>
           </div>
 
           <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
@@ -347,7 +347,7 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
               <CreditCard className="h-4 w-4 text-sky-400" />
               <span className="text-xs font-bold text-slate-200">Credit / Debit Card</span>
             </div>
-            <span className="text-sm font-black text-sky-400">${cardSales.toFixed(2)}</span>
+            <span className="text-sm font-black text-sky-400">₱{cardSales.toFixed(2)}</span>
           </div>
 
           <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
@@ -355,7 +355,7 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
               <Smartphone className="h-4 w-4 text-purple-400" />
               <span className="text-xs font-bold text-slate-200">GCash / E-Wallet</span>
             </div>
-            <span className="text-sm font-black text-purple-400">${gcashSales.toFixed(2)}</span>
+            <span className="text-sm font-black text-purple-400">₱{gcashSales.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -408,7 +408,7 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
                         {order.paymentStatus}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right font-black text-emerald-400">${order.total.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right font-black text-emerald-400">₱{order.total.toFixed(2)}</td>
                   </tr>
                 ))
               )}

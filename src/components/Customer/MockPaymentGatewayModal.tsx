@@ -197,7 +197,7 @@ export const MockPaymentGatewayModal: React.FC<MockPaymentGatewayModalProps> = (
                 Total Amount Due
               </span>
               <span className="text-2xl font-black text-emerald-400 tracking-tight">
-                ${amount.toFixed(2)}
+                ₱{amount.toFixed(2)}
               </span>
             </div>
 
@@ -256,7 +256,7 @@ export const MockPaymentGatewayModal: React.FC<MockPaymentGatewayModalProps> = (
               </div>
               <div className="flex justify-between items-center pt-1 text-sm font-black text-emerald-400">
                 <span>Amount Paid:</span>
-                <span>${amount.toFixed(2)}</span>
+                <span>₱{amount.toFixed(2)}</span>
               </div>
             </div>
 
@@ -293,7 +293,7 @@ export const MockPaymentGatewayModal: React.FC<MockPaymentGatewayModalProps> = (
 
               <div className={`flex items-center gap-2 transition ${processingStage >= 3 ? 'text-emerald-400' : 'text-slate-600'}`}>
                 <CheckCircle2 className={`h-4 w-4 shrink-0 ${processingStage >= 3 ? 'text-emerald-400' : 'text-slate-700'}`} />
-                <span>3. Authorizing Funds Transfer (${amount.toFixed(2)})</span>
+                <span>3. Authorizing Funds Transfer (₱{amount.toFixed(2)})</span>
               </div>
 
               <div className={`flex items-center gap-2 transition ${processingStage >= 4 ? 'text-emerald-400' : 'text-slate-600'}`}>
@@ -340,7 +340,7 @@ export const MockPaymentGatewayModal: React.FC<MockPaymentGatewayModalProps> = (
               <div className="space-y-4 text-center">
                 <div className="p-4 bg-white rounded-2xl border-4 border-indigo-500/40 inline-block shadow-xl my-1">
                   <QRCodeSVG
-                    value={`GOURMET-BISTRO|TABLE-${tableNumber}|USD-${amount.toFixed(2)}|REF-${Date.now().toString().slice(-6)}`}
+                    value={`GOURMET-BISTRO|TABLE-${tableNumber}|PHP-${amount.toFixed(2)}|REF-${Date.now().toString().slice(-6)}`}
                     size={170}
                     level="H"
                     includeMargin={false}
@@ -449,7 +449,7 @@ export const MockPaymentGatewayModal: React.FC<MockPaymentGatewayModalProps> = (
                   <div className="p-3 bg-sky-950/40 border border-sky-800/50 rounded-xl text-sky-300 flex items-center justify-between">
                     <div>
                       <div className="text-[10px] uppercase font-extrabold text-sky-400">Available Wallet Balance</div>
-                      <div className="text-sm font-black text-white">$250.00 USD</div>
+                      <div className="text-sm font-black text-white">₱250.00</div>
                     </div>
                     <div className="text-[10px] text-sky-400 bg-sky-500/20 px-2 py-1 rounded-md font-bold">
                       Sufficient Funds
@@ -494,7 +494,7 @@ export const MockPaymentGatewayModal: React.FC<MockPaymentGatewayModalProps> = (
                   onClick={startPaymentProcessing}
                   className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs py-3.5 rounded-2xl shadow-lg shadow-emerald-500/20 transition active:scale-95 flex items-center justify-center gap-2"
                 >
-                  <ShieldCheck className="h-4 w-4" /> Authorize Wallet Payment (${amount.toFixed(2)})
+                  <ShieldCheck className="h-4 w-4" /> Authorize Wallet Payment (₱{amount.toFixed(2)})
                 </button>
               </div>
             )}
@@ -581,7 +581,7 @@ export const MockPaymentGatewayModal: React.FC<MockPaymentGatewayModalProps> = (
                   onClick={startPaymentProcessing}
                   className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 transition active:scale-95 flex items-center justify-center gap-2"
                 >
-                  <Lock className="h-4 w-4" /> Pay ${amount.toFixed(2)} with 3D Secure
+                  <Lock className="h-4 w-4" /> Pay ₱{amount.toFixed(2)} with 3D Secure
                 </button>
               </div>
             )}

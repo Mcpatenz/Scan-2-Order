@@ -210,7 +210,7 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
 
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
-                        ${ord.total.toFixed(2)}
+                        ₱{ord.total.toFixed(2)}
                       </span>
                       {isExpanded ? (
                         <ChevronUp className="h-4 w-4 text-slate-400" />
@@ -262,7 +262,7 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
 
                               <div className="flex items-center gap-2 shrink-0">
                                 <span className="font-bold text-slate-700 dark:text-slate-300">
-                                  ${item.itemTotal.toFixed(2)}
+                                  ₱{item.itemTotal.toFixed(2)}
                                 </span>
                                 <button
                                   disabled={!available}

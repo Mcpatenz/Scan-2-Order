@@ -116,7 +116,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
-                      ${item.itemTotal.toFixed(2)}
+                      ₱{item.itemTotal.toFixed(2)}
                     </span>
 
                     {/* Stepper */}
@@ -189,21 +189,21 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
             <div className="flex justify-between">
               <span>Subtotal:</span>
-              <span className="font-semibold text-slate-900 dark:text-white">${cartSubtotal.toFixed(2)}</span>
+              <span className="font-semibold text-slate-900 dark:text-white">₱{cartSubtotal.toFixed(2)}</span>
             </div>
             {discountAmount > 0 && (
               <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                 <span>Discount:</span>
-                <span className="font-bold">-${discountAmount.toFixed(2)}</span>
+                <span className="font-bold">-₱{discountAmount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span>Estimated Tax (10%):</span>
-              <span className="font-semibold text-slate-900 dark:text-white">${cartTax.toFixed(2)}</span>
+              <span className="font-semibold text-slate-900 dark:text-white">₱{cartTax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-800 text-sm font-extrabold text-slate-900 dark:text-white">
               <span>Total:</span>
-              <span className="text-base text-emerald-600 dark:text-emerald-400">${cartTotal.toFixed(2)}</span>
+              <span className="text-base text-emerald-600 dark:text-emerald-400">₱{cartTotal.toFixed(2)}</span>
             </div>
 
             <button

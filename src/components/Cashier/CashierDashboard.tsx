@@ -200,7 +200,7 @@ export const CashierDashboard: React.FC = () => {
 
             <div className="rounded-2xl bg-slate-950 border border-slate-800 p-4">
               <p className="text-[10px] font-bold text-slate-400 uppercase">Today's Paid Sales</p>
-              <p className="text-xl font-black text-emerald-400 mt-1">${totalSalesToday.toFixed(2)}</p>
+              <p className="text-xl font-black text-emerald-400 mt-1">₱{totalSalesToday.toFixed(2)}</p>
               <p className="text-[10px] text-slate-500">Collected transactions</p>
             </div>
 
@@ -329,7 +329,7 @@ export const CashierDashboard: React.FC = () => {
                         </td>
 
                         <td className="px-4 py-4 font-black text-emerald-400">
-                          ${order.total.toFixed(2)}
+                          ₱{order.total.toFixed(2)}
                         </td>
 
                         {/* Payment Status Pill */}

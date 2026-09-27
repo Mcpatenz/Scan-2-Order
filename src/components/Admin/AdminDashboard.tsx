@@ -336,7 +336,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
-                    <span className="text-base font-black text-emerald-400">${p.price.toFixed(2)}</span>
+                    <span className="text-base font-black text-emerald-400">₱{p.price.toFixed(2)}</span>
 
                     <div className="flex gap-2">
                       <button
@@ -517,7 +517,7 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-slate-400 mb-1">Price ($):</label>
+                  <label className="block text-slate-400 mb-1">Price (₱):</label>
                   <input
                     type="number"
                     step="0.01"

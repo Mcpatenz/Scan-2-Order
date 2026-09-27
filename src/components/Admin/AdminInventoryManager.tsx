@@ -308,7 +308,7 @@ export const AdminInventoryManager: React.FC = () => {
 
                           {/* Price */}
                           <td className="py-3 px-4 font-black text-emerald-400">
-                            ${p.price.toFixed(2)}
+                            ₱{p.price.toFixed(2)}
                           </td>
 
                           {/* Status Badge */}

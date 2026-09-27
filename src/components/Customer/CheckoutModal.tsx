@@ -275,21 +275,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
             <div className="flex justify-between text-slate-600 dark:text-slate-400 pt-1">
               <span>Items ({cart.length}):</span>
-              <span>${cartSubtotal.toFixed(2)}</span>
+              <span>₱{cartSubtotal.toFixed(2)}</span>
             </div>
             {discountAmount > 0 && (
               <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
                 <span>Discount / Loyalty Reward:</span>
-                <span>-${discountAmount.toFixed(2)}</span>
+                <span>-₱{discountAmount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between text-slate-600 dark:text-slate-400">
               <span>Tax (10%):</span>
-              <span>${cartTax.toFixed(2)}</span>
+              <span>₱{cartTax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between pt-1.5 border-t border-slate-200 dark:border-slate-800 font-extrabold text-sm text-slate-900 dark:text-white">
               <span>Total Amount:</span>
-              <span className="text-emerald-600 dark:text-emerald-400">${cartTotal.toFixed(2)}</span>
+              <span className="text-emerald-600 dark:text-emerald-400">₱{cartTotal.toFixed(2)}</span>
             </div>
           </div>
 
@@ -304,7 +304,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             ) : (
               <CheckCircle2 className="h-4 w-4" />
             )}
-            <span>{isSubmitting ? 'Sending Order to Kitchen...' : `Place Order • $${cartTotal.toFixed(2)}`}</span>
+            <span>{isSubmitting ? 'Sending Order to Kitchen...' : `Place Order • ₱${cartTotal.toFixed(2)}`}</span>
           </button>
 
         </form>

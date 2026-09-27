@@ -2,9 +2,7 @@ import React, { useMemo, useState } from 'react';
 import {
   QrCode,
   ScanLine,
-  Utensils,
   ShieldCheck,
-  Sparkles,
   Search,
   Plus,
   LogOut,
@@ -82,31 +80,8 @@ export const CustomerLanding: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-full bg-slate-50 pb-24 text-slate-900 dark:bg-slate-900 dark:text-white">
-      {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-900 px-5 pt-10 pb-14 text-white">
-        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-white/10 blur-2xl"></div>
-        <div className="absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-teal-300/10 blur-2xl"></div>
-
-        <div className="relative z-10 flex flex-col items-center text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/15 backdrop-blur-md ring-1 ring-white/25 shadow-lg">
-            <Utensils className="h-8 w-8" />
-          </div>
-
-          <span className="mt-4 inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md">
-            <Sparkles className="h-3 w-3" /> Gourmet Bistro
-          </span>
-
-          <h1 className="mt-3 text-2xl font-black leading-tight tracking-tight">
-            Scan. Order. Enjoy.
-          </h1>
-          <p className="mt-2 max-w-[19rem] text-xs font-medium leading-relaxed text-emerald-50/90">
-            Browse our menu and order from your seat. No app download, no waiting to be seated.
-          </p>
-        </div>
-      </div>
-
       {/* Action Cards */}
-      <div className="-mt-8 space-y-2.5 px-4">
+      <div className="space-y-2.5 px-4 pt-4">
         {/* Signed in state */}
         {currentEmployee ? (
           <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3">
@@ -238,7 +213,7 @@ export const CustomerLanding: React.FC = () => {
 
                     <div className="mt-auto flex items-center justify-between pt-1.5">
                       <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
-                        ${product.price.toFixed(2)}
+                        ₱{product.price.toFixed(2)}
                       </span>
 
                       <button
@@ -248,8 +223,8 @@ export const CustomerLanding: React.FC = () => {
                         aria-label={canOrder ? `Add ${product.name}` : `Sign in to order ${product.name}`}
                         className={`flex h-7 w-7 items-center justify-center rounded-lg transition active:scale-90 ${
                           isOutOfStock
-                            ? 'cursor-not-allowed bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
-                            : 'bg-emerald-600 text-white shadow-xs hover:bg-emerald-500'
+                            ? 'cursor-not-allowed text-slate-400 dark:text-slate-500'
+                            : 'text-blue-500 hover:text-blue-400'
                         }`}
                       >
                         <Plus className="h-3.5 w-3.5" />
@@ -295,7 +270,7 @@ export const CustomerLanding: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 font-black text-sm">
-              <span>${cartSubtotal.toFixed(2)}</span>
+              <span>₱{cartSubtotal.toFixed(2)}</span>
               <ChevronRight className="h-4 w-4" />
             </div>
           </button>

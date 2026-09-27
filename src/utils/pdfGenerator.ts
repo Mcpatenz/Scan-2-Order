@@ -108,10 +108,10 @@ export function generatePdfReport(orders: Order[], filter: ReportFilterOptions) 
 
   // Summary Metrics Table/Grid
   const summaryRows = [
-    ['Total Net Revenue', `$${totalSales.toFixed(2)}`, 'Cash Payments', `$${cashTotal.toFixed(2)}`],
-    ['Total Orders Count', `${totalCount} orders`, 'Card Payments', `$${cardTotal.toFixed(2)}`],
-    ['Paid Orders', `${paidCount} orders`, 'GCash / Digital', `$${gcashTotal.toFixed(2)}`],
-    ['Unpaid Bills', `${unpaidCount} orders`, 'Avg Order Value', `$${avgOrderValue.toFixed(2)}`],
+    ['Total Net Revenue', `₱${totalSales.toFixed(2)}`, 'Cash Payments', `₱${cashTotal.toFixed(2)}`],
+    ['Total Orders Count', `${totalCount} orders`, 'Card Payments', `₱${cardTotal.toFixed(2)}`],
+    ['Paid Orders', `${paidCount} orders`, 'GCash / Digital', `₱${gcashTotal.toFixed(2)}`],
+    ['Unpaid Bills', `${unpaidCount} orders`, 'Avg Order Value', `₱${avgOrderValue.toFixed(2)}`],
     ['Cancelled Orders', `${cancelledCount} orders`, 'Report Scope', periodLabel],
   ];
 
@@ -151,7 +151,7 @@ export function generatePdfReport(orders: Order[], filter: ReportFilterOptions) 
     o.paymentMethod.toUpperCase(),
     o.paymentStatus.toUpperCase(),
     o.status.toUpperCase(),
-    `$${o.total.toFixed(2)}`,
+    `₱${o.total.toFixed(2)}`,
   ]);
 
   autoTable(doc, {

@@ -491,7 +491,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     setRedeemedLoyaltyPoints(points);
     setRedeemedLoyaltyDiscount(discountInDollars);
-    showToast(`🎉 Redeemed ${points} PTS for $${discountInDollars.toFixed(2)} discount!`);
+    showToast(`🎉 Redeemed ${points} PTS for ₱${discountInDollars.toFixed(2)} discount!`);
     if (soundEnabled) playChime('success');
     return true;
   };
@@ -758,7 +758,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
 
     // Award loyalty points & deduct redeemed points
-    const pointsEarned = Math.max(10, Math.round(cartTotal * 10)); // 10 points per $1 spent
+    const pointsEarned = Math.max(10, Math.round(cartTotal * 10)); // 10 points per ₱1 spent
     let netPointsChange = pointsEarned;
     const newTxList: LoyaltyTransaction[] = [];
 
@@ -767,7 +767,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       newTxList.push({
         id: `tx-red-${Date.now()}`,
         date: new Date().toISOString(),
-        title: `Redeemed for $${redeemedLoyaltyDiscount.toFixed(2)} Order Discount`,
+        title: `Redeemed for ₱${redeemedLoyaltyDiscount.toFixed(2)} Order Discount`,
         points: -redeemedLoyaltyPoints,
         type: 'redeemed',
       });

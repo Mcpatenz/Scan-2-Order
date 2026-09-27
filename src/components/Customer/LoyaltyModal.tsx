@@ -26,29 +26,29 @@ interface LoyaltyModalProps {
 const AVAILABLE_REWARDS: LoyaltyReward[] = [
   {
     id: 'rew-1',
-    title: '$2.00 Order Discount',
-    description: 'Instantly deduct $2.00 from your active cart subtotal.',
+    title: '₱2.00 Order Discount',
+    description: 'Instantly deduct ₱2.00 from your active cart subtotal.',
     pointsCost: 200,
     discountValue: 2.0,
   },
   {
     id: 'rew-2',
-    title: 'Free Drink / Dessert ($3.50 Value)',
-    description: 'Get $3.50 off your favorite beverage or dessert item.',
+    title: 'Free Drink / Dessert (₱3.50 Value)',
+    description: 'Get ₱3.50 off your favorite beverage or dessert item.',
     pointsCost: 350,
     discountValue: 3.5,
   },
   {
     id: 'rew-3',
-    title: '$5.00 Chef Special Discount',
-    description: 'Save $5.00 off any main entree or platter order.',
+    title: '₱5.00 Chef Special Discount',
+    description: 'Save ₱5.00 off any main entree or platter order.',
     pointsCost: 500,
     discountValue: 5.0,
   },
   {
     id: 'rew-4',
-    title: '$10.00 VIP Feast Reward',
-    description: 'Big $10.00 discount for family dining or group orders.',
+    title: '₱10.00 VIP Feast Reward',
+    description: 'Big ₱10.00 discount for family dining or group orders.',
     pointsCost: 900,
     discountValue: 10.0,
   },
@@ -136,7 +136,7 @@ export const LoyaltyModal: React.FC<LoyaltyModalProps> = ({ isOpen, onClose, onO
                 Gourmet Rewards
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Earn 10 points for every $1 spent on delicious meals
+                Earn 10 points for every ₱1 spent on delicious meals
               </p>
             </div>
           </div>
@@ -168,7 +168,7 @@ export const LoyaltyModal: React.FC<LoyaltyModalProps> = ({ isOpen, onClose, onO
                 <span className="text-2xl font-black text-amber-400">{loyaltyPoints}</span>
                 <span className="text-xs font-extrabold text-amber-300">PTS</span>
               </div>
-              <p className="text-[10px] text-slate-400">≈ ${(loyaltyPoints / 100).toFixed(2)} value</p>
+              <p className="text-[10px] text-slate-400">≈ ₱{(loyaltyPoints / 100).toFixed(2)} value</p>
             </div>
           </div>
 
@@ -195,7 +195,7 @@ export const LoyaltyModal: React.FC<LoyaltyModalProps> = ({ isOpen, onClose, onO
               <div>
                 <p className="text-xs font-extrabold">Active Reward Applied!</p>
                 <p className="text-[11px] opacity-90">
-                  -${redeemedLoyaltyDiscount.toFixed(2)} off active cart ({redeemedLoyaltyPoints} PTS)
+                  -₱{redeemedLoyaltyDiscount.toFixed(2)} off active cart ({redeemedLoyaltyPoints} PTS)
                 </p>
               </div>
             </div>

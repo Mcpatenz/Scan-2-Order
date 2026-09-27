@@ -149,7 +149,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
               {product.name}
             </h2>
             <span className="text-lg font-black text-emerald-600 dark:text-emerald-400 ml-2">
-              ${unitPrice.toFixed(2)}
+              ₱{unitPrice.toFixed(2)}
             </span>
           </div>
           <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -206,7 +206,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                         </div>
                         {opt.price > 0 && (
                           <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                            +${opt.price.toFixed(2)}
+                            +₱{opt.price.toFixed(2)}
                           </span>
                         )}
                       </button>
@@ -267,7 +267,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             }`}
           >
             <span>{isOutOfStock ? 'Item Out of Stock' : 'Add to Cart'}</span>
-            <span>${isOutOfStock ? '0.00' : totalPrice.toFixed(2)}</span>
+            <span>₱{isOutOfStock ? '0.00' : totalPrice.toFixed(2)}</span>
           </button>
         </div>
 
