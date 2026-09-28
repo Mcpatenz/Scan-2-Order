@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* When a print-friendly receipt modal is open, hide non-receipt background UI */
+  body:has(#print-friendly-digital-receipt) > div > *:not(main) {
+    display: none !important;
+  }
+
+  #print-friendly-digital-receipt {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+

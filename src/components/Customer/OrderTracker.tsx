@@ -1,29 +1,65 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useOrderContext } from '../../context/OrderContext';
-import { OrderStatus } from '../../types';
+import { OrderStatus, PaymentMethod } from '../../types';
 import {
   Clock,
   CheckCircle2,
   ChefHat,
   Bell,
-  XCircle,
   Receipt,
   GlassWater,
   Sparkles,
   History,
-  PlayCircle,
-  Volume2,
+  LogOut,
+  Lock,
+  Printer,
+  BellRing,
 } from 'lucide-react';
 import { ReceiptModal } from '../Common/ReceiptModal';
 import { CallWaiterModal } from '../Common/CallWaiterModal';
 import { OrderStatusToast, StatusToastNotification, getStatusMeta } from './OrderStatusToast';
+import { SimulatedPushPayload } from './MobilePushNotification';
+
+const formatPaymentMethodName = (method: PaymentMethod): string => {
+  switch (method) {
+    case 'gcash':
+      return 'GCash';
+    case 'paymaya':
+      return 'PayMaya';
+    case 'cash_on_hand':
+    case 'cash':
+      return 'Cash on Hand';
+    default:
+      return method.replace(/_/g, ' ').toUpperCase();
+  }
+};
 
 export const OrderTracker: React.FC = () => {
-  const { currentCustomerOrder, updateOrderStatus, cancelOrder, activeTable, soundEnabled } = useOrderContext();
+  const { currentCustomerOrder, exitTableSession, activeTable, updateOrderStatus } = useOrderContext();
 
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [waiterModalOpen, setWaiterModalOpen] = useState(false);
   const [minsRemaining, setMinsRemaining] = useState<number>(12);
+
+  const handleSimulateReadyPush = () => {
+    if (currentCustomerOrder && currentCustomerOrder.status !== 'ready') {
+      updateOrderStatus(currentCustomerOrder.id, 'ready');
+      return;
+    }
+
+    const payload: SimulatedPushPayload = {
+      id: `push-${Date.now()}`,
+      orderId: currentCustomerOrder?.id || '1042',
+      tableNumber: currentCustomerOrder?.tableNumber || activeTable.tableNumber,
+      customerName: currentCustomerOrder?.customerName || 'Valued Guest',
+      diningOption: currentCustomerOrder?.diningOption || 'dine_in',
+      itemsSummary: currentCustomerOrder
+        ? currentCustomerOrder.items.map(i => `${i.quantity}x ${i.productName}`).join(', ')
+        : '1x Truffle Wagyu Burger, 1x Artisanal Iced Matcha',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    window.dispatchEvent(new CustomEvent('dineflow-simulate-push', { detail: payload }));
+  };
 
   // Status Notification Toast states
   const [activeToast, setActiveToast] = useState<StatusToastNotification | null>(null);
@@ -41,7 +77,7 @@ export const OrderTracker: React.FC = () => {
     const currentId = currentCustomerOrder.id;
     const currentStatus = currentCustomerOrder.status;
 
-    // Detect if status changed
+    // Detect if status changed from Kitchen Dashboard
     if (
       prevStatusRef.current &&
       prevStatusRef.current.orderId === currentId &&
@@ -63,14 +99,12 @@ export const OrderTracker: React.FC = () => {
       setNotificationHistory(prev => [newToast, ...prev]);
     }
 
-    // Update ref
     prevStatusRef.current = { orderId: currentId, status: currentStatus };
   }, [currentCustomerOrder?.id, currentCustomerOrder?.status]);
 
   useEffect(() => {
     if (!currentCustomerOrder) return;
 
-    // Simulate countdown timer
     const interval = setInterval(() => {
       setMinsRemaining(prev => Math.max(0, prev - 1));
     }, 60000);
@@ -88,6 +122,14 @@ export const OrderTracker: React.FC = () => {
         <p className="text-xs text-slate-500 max-w-xs mt-1">
           Select items from the menu and submit your order to see live tracking for Table #{activeTable.tableNumber}.
         </p>
+        <button
+          type="button"
+          onClick={handleSimulateReadyPush}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 text-xs font-black text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition active:scale-95"
+        >
+          <BellRing className="h-3.5 w-3.5" />
+          <span>Simulate &apos;Ready for Pickup&apos; Push Alert</span>
+        </button>
       </div>
     );
   }
@@ -102,7 +144,7 @@ export const OrderTracker: React.FC = () => {
     {
       status: 'accepted',
       label: 'Confirmed',
-      desc: 'Cashier accepted',
+      desc: 'Accepted in kitchen',
       icon: <CheckCircle2 className="h-4 w-4" />,
     },
     {
@@ -113,8 +155,8 @@ export const OrderTracker: React.FC = () => {
     },
     {
       status: 'ready',
-      label: 'Ready!',
-      desc: 'Ready for table',
+      label: 'Ready for Pickup',
+      desc: 'Ready at pickup counter / table',
       icon: <Bell className="h-4 w-4 animate-bounce text-emerald-400" />,
     },
     {
@@ -137,7 +179,6 @@ export const OrderTracker: React.FC = () => {
 
   return (
     <div className="rounded-3xl bg-white p-5 shadow-xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 my-4 space-y-5 animate-fadeIn">
-      
       {/* Active Order Status Notification Toast */}
       {activeToast && (
         <OrderStatusToast
@@ -158,88 +199,52 @@ export const OrderTracker: React.FC = () => {
             </span>
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5">
-            Placed at {new Date(currentCustomerOrder.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            Placed at {new Date(currentCustomerOrder.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Paid via {formatPaymentMethodName(currentCustomerOrder.paymentMethod)}
           </p>
         </div>
 
         <button
           onClick={() => setReceiptOpen(true)}
-          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
+          className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white shadow-sm shadow-emerald-600/25 hover:bg-emerald-500 active:scale-95 transition"
         >
-          <Receipt className="h-3.5 w-3.5" />
-          <span>Receipt</span>
+          <Printer className="h-3.5 w-3.5" />
+          <span>Digital Receipt</span>
         </button>
       </div>
 
-      {/* Live Status Simulation Quick Buttons */}
-      <div className="rounded-2xl bg-slate-950 p-3 border border-slate-800 text-xs space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
-            <PlayCircle className="h-3.5 w-3.5" /> Demo Order Status Changer
-          </span>
-          <span className="text-[10px] text-slate-400">Click to trigger live toast</span>
+      {/* Kitchen Live Sync Notice & Table Lock Status */}
+      <div className="rounded-2xl bg-slate-950 p-3.5 border border-slate-800 text-xs flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
+            <ChefHat className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-[11px] font-black text-white">
+              Synced with Kitchen Dashboard
+            </p>
+            <p className="text-[10px] text-slate-400">
+              Order status is updated live by the kitchen staff.
+            </p>
+          </div>
         </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-          <button
-            onClick={() => updateOrderStatus(currentCustomerOrder.id, 'accepted')}
-            disabled={currentCustomerOrder.status === 'accepted'}
-            className={`py-1.5 px-2 rounded-xl text-[10px] font-bold border transition ${
-              currentCustomerOrder.status === 'accepted'
-                ? 'bg-sky-500 text-white border-sky-400'
-                : 'bg-slate-900 text-sky-400 border-slate-800 hover:bg-slate-800'
-            }`}
-          >
-            1. Accept
-          </button>
-
-          <button
-            onClick={() => updateOrderStatus(currentCustomerOrder.id, 'preparing')}
-            disabled={currentCustomerOrder.status === 'preparing'}
-            className={`py-1.5 px-2 rounded-xl text-[10px] font-bold border transition ${
-              currentCustomerOrder.status === 'preparing'
-                ? 'bg-orange-500 text-white border-orange-400'
-                : 'bg-slate-900 text-orange-400 border-slate-800 hover:bg-slate-800'
-            }`}
-          >
-            2. Preparing
-          </button>
-
-          <button
-            onClick={() => updateOrderStatus(currentCustomerOrder.id, 'ready')}
-            disabled={currentCustomerOrder.status === 'ready'}
-            className={`py-1.5 px-2 rounded-xl text-[10px] font-bold border transition ${
-              currentCustomerOrder.status === 'ready'
-                ? 'bg-emerald-500 text-white border-emerald-400'
-                : 'bg-slate-900 text-emerald-400 border-slate-800 hover:bg-slate-800'
-            }`}
-          >
-            3. Order Ready
-          </button>
-
-          <button
-            onClick={() => updateOrderStatus(currentCustomerOrder.id, 'completed')}
-            disabled={currentCustomerOrder.status === 'completed'}
-            className={`py-1.5 px-2 rounded-xl text-[10px] font-bold border transition ${
-              currentCustomerOrder.status === 'completed'
-                ? 'bg-purple-500 text-white border-purple-400'
-                : 'bg-slate-900 text-purple-400 border-slate-800 hover:bg-slate-800'
-            }`}
-          >
-            4. Complete
-          </button>
-        </div>
+        <span className="inline-flex items-center gap-1 rounded-lg bg-rose-500/15 border border-rose-500/30 px-2 py-1 text-[10px] font-black text-rose-300 shrink-0">
+          <Lock className="h-3 w-3" /> Table #{currentCustomerOrder.tableNumber} Reserved
+        </span>
       </div>
 
-      {/* Countdown Card */}
+      {/* Countdown / Scheduled Time Card */}
       {currentCustomerOrder.status !== 'ready' && currentCustomerOrder.status !== 'completed' && currentCustomerOrder.status !== 'cancelled' && (
         <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 p-4 border border-emerald-500/20">
           <div>
             <p className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
-              Estimated Prep Time
+              {currentCustomerOrder.isScheduled && currentCustomerOrder.scheduledFor
+                ? 'Scheduled Preparation Time'
+                : 'Estimated Prep Time'}
             </p>
             <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5">
-              ~{minsRemaining} Minutes
+              {currentCustomerOrder.isScheduled && currentCustomerOrder.scheduledFor
+                ? currentCustomerOrder.scheduledFor
+                : `~${minsRemaining} Minutes`}
             </p>
           </div>
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 animate-pulse">
@@ -250,10 +255,34 @@ export const OrderTracker: React.FC = () => {
 
       {currentCustomerOrder.status === 'ready' && (
         <div className="rounded-2xl bg-emerald-500 p-4 text-white shadow-xl shadow-emerald-500/30 text-center space-y-1 animate-bounce">
-          <p className="text-lg font-black">🎉 YOUR ORDER IS READY!</p>
-          <p className="text-xs text-emerald-100">Our team is bringing it to Table #{currentCustomerOrder.tableNumber} right now.</p>
+          <p className="text-lg font-black">🎉 READY FOR PICKUP!</p>
+          <p className="text-xs text-emerald-100">
+            Order #{currentCustomerOrder.id} for Table #{currentCustomerOrder.tableNumber} is hot and ready for pickup!
+          </p>
         </div>
       )}
+
+      {/* Simulated Push Notification Trigger Bar */}
+      <div className="flex items-center justify-between gap-2 rounded-2xl border border-emerald-500/25 bg-emerald-500/5 px-3.5 py-2.5">
+        <div className="flex items-center gap-2 min-w-0">
+          <BellRing className="h-4 w-4 text-emerald-500 shrink-0" />
+          <div className="min-w-0">
+            <p className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200 truncate">
+              Mobile Push Alerts Active
+            </p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+              Alerts you when status updates to &apos;Ready for Pickup&apos;
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleSimulateReadyPush}
+          className="shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-[10px] font-black text-white shadow-sm transition active:scale-95"
+        >
+          {currentCustomerOrder.status === 'ready' ? 'Test Push Alert' : 'Mark Ready & Alert'}
+        </button>
+      </div>
 
       {/* Timeline Steps */}
       <div className="relative pl-6 space-y-5 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
@@ -293,9 +322,16 @@ export const OrderTracker: React.FC = () => {
         })}
       </div>
 
-      {/* Ordered Items Accordion / Summary */}
+      {/* Ordered Items Summary */}
       <div className="rounded-2xl bg-slate-50 p-3.5 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 text-xs">
-        <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-2">Order Items ({currentCustomerOrder.items.length}):</h4>
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="font-bold text-slate-800 dark:text-slate-200">
+            Order Items ({currentCustomerOrder.items.length}):
+          </h4>
+          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            {formatPaymentMethodName(currentCustomerOrder.paymentMethod)} • Paid
+          </span>
+        </div>
         <div className="space-y-1.5 divide-y divide-slate-200/50 dark:divide-slate-800/50">
           {currentCustomerOrder.items.map((it, i) => (
             <div key={i} className="pt-1.5 flex justify-between text-slate-700 dark:text-slate-300">
@@ -328,7 +364,9 @@ export const OrderTracker: React.FC = () => {
         {showHistoryLog && (
           <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2 max-h-48 overflow-y-auto">
             {notificationHistory.length === 0 ? (
-              <p className="text-[11px] text-slate-400 italic">No status change alerts yet. Change status above to view alerts log.</p>
+              <p className="text-[11px] text-slate-400 italic">
+                No status change alerts yet. Updates from the Kitchen Dashboard will appear here automatically.
+              </p>
             ) : (
               notificationHistory.map(notif => {
                 const fromMeta = getStatusMeta(notif.fromStatus);
@@ -355,7 +393,7 @@ export const OrderTracker: React.FC = () => {
         )}
       </div>
 
-      {/* Quick Service Request Buttons */}
+      {/* Quick Service Request & Exit Button (Replaces Cancel Button after payment) */}
       <div className="flex gap-2">
         <button
           onClick={() => setWaiterModalOpen(true)}
@@ -365,22 +403,23 @@ export const OrderTracker: React.FC = () => {
           <span>Call Water / Waiter</span>
         </button>
 
-        {currentCustomerOrder.status === 'pending' && (
-          <button
-            onClick={() => cancelOrder(currentCustomerOrder.id)}
-            className="flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-bold text-red-600 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400"
-          >
-            <XCircle className="h-4 w-4" />
-            <span>Cancel</span>
-          </button>
-        )}
+        <button
+          onClick={exitTableSession}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-600 px-4 py-2.5 text-xs font-black text-white shadow-md shadow-rose-600/25 hover:bg-rose-500 active:scale-95 transition"
+          title="Log out and return to the Landing Page"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Log Out</span>
+        </button>
       </div>
 
-      {/* Receipt Modal */}
+      {/* Print-Friendly Digital Receipt Modal */}
       <ReceiptModal
         order={currentCustomerOrder}
         isOpen={receiptOpen}
         onClose={() => setReceiptOpen(false)}
+        isPostPayment={currentCustomerOrder.paymentStatus === 'paid'}
+        onExitTable={exitTableSession}
       />
 
       {/* Call Waiter Modal */}
@@ -388,7 +427,6 @@ export const OrderTracker: React.FC = () => {
         isOpen={waiterModalOpen}
         onClose={() => setWaiterModalOpen(false)}
       />
-
     </div>
   );
 };

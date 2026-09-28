@@ -1,6 +1,14 @@
 export type OrderStatus = 'pending' | 'accepted' | 'preparing' | 'ready' | 'completed' | 'cancelled';
 
-export type PaymentMethod = 'cash' | 'card' | 'gcash' | 'pay_at_counter' | 'qr_wallet' | 'virtual_wallet';
+export type PaymentMethod =
+  | 'gcash'
+  | 'paymaya'
+  | 'cash_on_hand'
+  | 'cash'
+  | 'card'
+  | 'pay_at_counter'
+  | 'qr_wallet'
+  | 'virtual_wallet';
 
 export type PaymentStatus = 'unpaid' | 'paid' | 'refunded';
 
@@ -22,15 +30,35 @@ export interface ModifierGroup {
 
 export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
 
+export interface LowStockAlertConfig {
+  enabled: boolean;
+  dashboardNotifications: boolean;
+  emailNotifications: boolean;
+  recipientEmails: string[];
+  notifyOnLowStock: boolean;
+  notifyOnOutOfStock: boolean;
+  notifyOnRestock: boolean;
+  globalDefaultThreshold: number;
+  autoReorderSuggestion: number;
+}
+
 export interface InventoryAlert {
   id: string;
   productId: string;
   productName: string;
+  categoryName?: string;
   previousStock: number;
   currentStock: number;
+  threshold?: number;
   status: StockStatus;
   timestamp: string;
   message: string;
+  channelsNotified?: ('dashboard' | 'email')[];
+  recipientEmails?: string[];
+  emailSubject?: string;
+  emailBodyPreview?: string;
+  acknowledged?: boolean;
+  triggerSource?: 'order_placed' | 'stock_update' | 'threshold_change' | 'scheduled_scan' | 'manual_test';
 }
 
 export interface Product {
@@ -43,11 +71,14 @@ export interface Product {
   inStock: boolean;
   stockQuantity?: number;
   lowStockThreshold?: number;
+  alertEnabled?: boolean;
+  autoReorderQuantity?: number;
   calories?: number;
   prepTimeMinutes?: number;
   isPopular?: boolean;
   modifierGroups?: ModifierGroup[];
 }
+
 
 export interface Category {
   id: string;
@@ -84,6 +115,17 @@ export interface OrderItem {
   itemTotal: number;
 }
 
+export interface CustomerFeedback {
+  id: string;
+  orderId: string;
+  tableNumber: string;
+  customerName: string;
+  rating: number; // 1 to 5
+  tags?: string[];
+  comment?: string;
+  createdAt: string;
+}
+
 export interface Order {
   id: string; // e.g., #ORD-101
   tableId: string;
@@ -102,9 +144,12 @@ export interface Order {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   notes?: string;
+  isScheduled?: boolean;
+  scheduledFor?: string; // ISO string or formatted future schedule timestamp
   createdAt: string; // ISO string
   updatedAt: string;
   estimatedReadyTime?: string; // ISO string
+  feedback?: CustomerFeedback;
 }
 
 export interface CashierInfo {
@@ -123,7 +168,7 @@ export interface Table {
   section: 'Main Hall' | 'Patio' | 'VIP Room' | 'Bar Area';
   capacity: number;
   qrCodeUrl: string;
-  status: 'available' | 'occupied' | 'reserved';
+  status: 'available' | 'occupied' | 'cleaning' | 'reserved';
   currentOrderId?: string;
 }
 
@@ -160,8 +205,31 @@ export interface ClockLog {
   id: string;
   employeeId: string;
   employeeName: string;
+  employeeCode?: string;
+  role?: string;
   type: 'clock_in' | 'break_start' | 'break_end' | 'clock_out';
   timestamp: string; // ISO String
+  shiftDurationHours?: number;
+  notes?: string;
+}
+
+export interface ShiftSession {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  role: string;
+  department: 'Front of House' | 'Kitchen & Culinary' | 'Bar & Beverage' | 'Management';
+  hourlyRate: number;
+  date: string; // YYYY-MM-DD
+  scheduledShift: string;
+  clockInTime: string; // ISO string
+  clockOutTime?: string; // ISO string (undefined if still active)
+  breakMinutes: number;
+  regularHours: number;
+  overtimeHours: number;
+  totalHours: number;
+  status: 'active' | 'on_break' | 'completed';
   notes?: string;
 }
 
@@ -199,21 +267,39 @@ export interface Employee {
   employeeCode: string; // e.g. "EMP-101"
   pinCode?: string;
   scheduledShift?: string;
+  hourlyRate?: number;
 }
 
 export interface EmployeeSchedule {
   employeeId: string;
   employeeName: string;
   role: string;
+  department?: 'Front of House' | 'Kitchen & Culinary' | 'Bar & Beverage' | 'Management';
   employeeCode: string;
   avatarUrl?: string;
   scheduledShift: string; // e.g. "08:00 AM - 04:00 PM"
   scheduledHours: number;
+  hourlyRate?: number;
   status: ClockStatus;
   lastClockIn?: string; // ISO string
   lastClockOut?: string; // ISO string
   breakStartTime?: string; // ISO string
+  accumulatedBreakMinutesToday?: number;
   totalHoursWorkedToday: number;
+  weeklyHoursWorked?: number;
   pinCode: string;
 }
+
+export interface BusinessSettings {
+  businessName: string;
+  address: string;
+  contactNumber: string;
+  timeOpen: string; // e.g. "08:00"
+  timeClosed: string; // e.g. "22:00"
+  gcashNumber: string;
+  gcashQrCode: string; // Base64 Data URL or image URL
+  paymayaNumber: string;
+  paymayaQrCode: string; // Base64 Data URL or image URL
+}
+
 

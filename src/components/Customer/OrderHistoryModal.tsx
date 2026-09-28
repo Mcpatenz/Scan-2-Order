@@ -14,6 +14,7 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
   const [selectedReceiptOrder, setSelectedReceiptOrder] = useState<Order | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dateRangeFilter, setDateRangeFilter] = useState<'all' | '7d' | '30d'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'pending' | 'cancelled'>('all');
 
   if (!isOpen) return null;
@@ -77,7 +78,19 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
     }
   };
 
+  const isWithinDays = (isoDate: string, days: number) => {
+    const orderTime = new Date(isoDate).getTime();
+    if (isNaN(orderTime)) return true;
+    return orderTime >= Date.now() - days * 24 * 60 * 60 * 1000;
+  };
+
+  const count7d = customerOrderHistory.filter(o => isWithinDays(o.createdAt, 7)).length;
+  const count30d = customerOrderHistory.filter(o => isWithinDays(o.createdAt, 30)).length;
+
   const filteredOrders = customerOrderHistory.filter(ord => {
+    if (dateRangeFilter === '7d' && !isWithinDays(ord.createdAt, 7)) return false;
+    if (dateRangeFilter === '30d' && !isWithinDays(ord.createdAt, 30)) return false;
+
     const matchesSearch =
       ord.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ord.items.some(i => i.productName.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -131,6 +144,29 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
               />
             </div>
 
+            <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+              {(
+                [
+                  { id: '7d', label: `Last 7 Days (${count7d})` },
+                  { id: '30d', label: `Last 30 Days (${count30d})` },
+                  { id: 'all', label: `All Orders (${customerOrderHistory.length})` },
+                ] as const
+              ).map(range => (
+                <button
+                  key={range.id}
+                  type="button"
+                  onClick={() => setDateRangeFilter(range.id)}
+                  className={`rounded-lg py-1.5 px-2 text-[11px] font-extrabold transition truncate ${
+                    dateRangeFilter === range.id
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                  }`}
+                >
+                  {range.label}
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
               <button
                 onClick={() => setStatusFilter('all')}
@@ -140,7 +176,7 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
                     : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
                 }`}
               >
-                All
+                All Status
               </button>
               <button
                 onClick={() => setStatusFilter('completed')}
@@ -233,44 +269,46 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
                       <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
                         Items Ordered
                       </p>
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         {ord.items.map((item, idx) => {
                           const available = isProductAvailable(item.productId);
 
                           return (
                             <div
                               key={idx}
-                              className="flex items-center justify-between bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800/80 text-xs"
+                              className="flex flex-col gap-2 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/80 text-xs"
                             >
-                              <div className="min-w-0 flex-1 pr-2">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-extrabold text-slate-900 dark:text-white">
-                                    {item.quantity}x {item.productName}
-                                  </span>
-                                  {!available && (
-                                    <span className="text-[9px] font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.2 rounded">
-                                      Sold Out
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <span className="font-extrabold text-slate-900 dark:text-white break-words">
+                                      {item.quantity}x {item.productName}
                                     </span>
+                                    {!available && (
+                                      <span className="text-[9px] font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded">
+                                        Sold Out
+                                      </span>
+                                    )}
+                                  </div>
+                                  {item.modifiers && item.modifiers.length > 0 && (
+                                    <p className="text-[10px] text-slate-400 mt-0.5">
+                                      {item.modifiers.map(m => m.optionName).join(' · ')}
+                                    </p>
                                   )}
                                 </div>
-                                {item.modifiers && item.modifiers.length > 0 && (
-                                  <p className="text-[10px] text-slate-400 truncate">
-                                    {item.modifiers.map(m => m.optionName).join(', ')}
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="flex items-center gap-2 shrink-0">
-                                <span className="font-bold text-slate-700 dark:text-slate-300">
+                                <span className="font-black text-slate-800 dark:text-slate-200 tabular-nums shrink-0">
                                   ₱{item.itemTotal.toFixed(2)}
                                 </span>
+                              </div>
+
+                              <div className="flex items-center justify-end pt-1.5 border-t border-slate-100 dark:border-slate-800/60">
                                 <button
                                   disabled={!available}
                                   onClick={(e) => handleReorderItem(e, item)}
-                                  className="flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                                  className="flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-[10px] font-black text-white hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed transition"
                                   title="Add single item to cart"
                                 >
-                                  <RotateCcw className="h-3 w-3" /> Reorder
+                                  <RotateCcw className="h-3 w-3 shrink-0" /> Reorder Item
                                 </button>
                               </div>
                             </div>
@@ -281,22 +319,22 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({ isOpen, on
                   )}
 
                   {/* Actions Footer */}
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800/60">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200 dark:border-slate-800/60">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedReceiptOrder(ord);
                       }}
-                      className="flex items-center gap-1 text-[11px] font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
+                      className="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition"
                     >
-                      <Receipt className="h-3.5 w-3.5" /> View Receipt
+                      <Receipt className="h-3.5 w-3.5 text-emerald-500 shrink-0" /> View Receipt
                     </button>
 
                     <button
                       onClick={(e) => handleReorderOrder(e, ord)}
-                      className="flex items-center gap-1 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-500 active:scale-95 transition"
+                      className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-black text-white shadow-xs hover:bg-emerald-500 active:scale-95 transition"
                     >
-                      <RotateCcw className="h-3.5 w-3.5" /> Re-order All Items
+                      <RotateCcw className="h-3.5 w-3.5 shrink-0" /> Reorder All
                     </button>
                   </div>
                 </div>

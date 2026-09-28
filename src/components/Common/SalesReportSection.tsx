@@ -86,16 +86,22 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
   const avgOrderValue = paidOrdersCount > 0 ? totalPaidRevenue / paidOrdersCount : 0;
 
   // Method Breakdown
-  const cashSales = filteredOrders
-    .filter(o => o.paymentStatus === 'paid' && o.paymentMethod === 'cash')
-    .reduce((sum, o) => sum + o.total, 0);
-
-  const cardSales = filteredOrders
-    .filter(o => o.paymentStatus === 'paid' && o.paymentMethod === 'card')
-    .reduce((sum, o) => sum + o.total, 0);
-
   const gcashSales = filteredOrders
     .filter(o => o.paymentStatus === 'paid' && o.paymentMethod === 'gcash')
+    .reduce((sum, o) => sum + o.total, 0);
+
+  const paymayaSales = filteredOrders
+    .filter(o => o.paymentStatus === 'paid' && o.paymentMethod === 'paymaya')
+    .reduce((sum, o) => sum + o.total, 0);
+
+  const cashOnHandSales = filteredOrders
+    .filter(
+      o =>
+        o.paymentStatus === 'paid' &&
+        (o.paymentMethod === 'cash_on_hand' ||
+          o.paymentMethod === 'cash' ||
+          o.paymentMethod === 'pay_at_counter')
+    )
     .reduce((sum, o) => sum + o.total, 0);
 
   // Download PDF handler
@@ -336,26 +342,26 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Banknote className="h-4 w-4 text-emerald-400" />
-              <span className="text-xs font-bold text-slate-200">Cash Payments</span>
+              <Smartphone className="h-4 w-4 text-blue-400" />
+              <span className="text-xs font-bold text-slate-200">GCash</span>
             </div>
-            <span className="text-sm font-black text-emerald-400">₱{cashSales.toFixed(2)}</span>
+            <span className="text-sm font-black text-blue-400">₱{gcashSales.toFixed(2)}</span>
           </div>
 
           <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-sky-400" />
-              <span className="text-xs font-bold text-slate-200">Credit / Debit Card</span>
+              <CreditCard className="h-4 w-4 text-emerald-400" />
+              <span className="text-xs font-bold text-slate-200">PayMaya</span>
             </div>
-            <span className="text-sm font-black text-sky-400">₱{cardSales.toFixed(2)}</span>
+            <span className="text-sm font-black text-emerald-400">₱{paymayaSales.toFixed(2)}</span>
           </div>
 
           <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Smartphone className="h-4 w-4 text-purple-400" />
-              <span className="text-xs font-bold text-slate-200">GCash / E-Wallet</span>
+              <Banknote className="h-4 w-4 text-amber-400" />
+              <span className="text-xs font-bold text-slate-200">Cash on Hand</span>
             </div>
-            <span className="text-sm font-black text-purple-400">₱{gcashSales.toFixed(2)}</span>
+            <span className="text-sm font-black text-amber-400">₱{cashOnHandSales.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -400,7 +406,15 @@ export const SalesReportSection: React.FC<SalesReportSectionProps> = ({
                     <td className="px-4 py-3 font-extrabold text-amber-400">Table #{order.tableNumber}</td>
                     <td className="px-4 py-3 text-slate-200">{order.customerName}</td>
                     <td className="px-4 py-3 text-sky-400 font-semibold">{order.cashierName || userName}</td>
-                    <td className="px-4 py-3 uppercase font-bold text-slate-300">{order.paymentMethod}</td>
+                    <td className="px-4 py-3 uppercase font-bold text-slate-300">
+                      {order.paymentMethod === 'cash_on_hand'
+                        ? 'CASH ON HAND'
+                        : order.paymentMethod === 'paymaya'
+                        ? 'PAYMAYA'
+                        : order.paymentMethod === 'gcash'
+                        ? 'GCASH'
+                        : order.paymentMethod.replace(/_/g, ' ')}
+                    </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
                         order.paymentStatus === 'paid' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'

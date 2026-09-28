@@ -12,6 +12,7 @@ import {
   Upload,
   SwitchCamera,
   RefreshCw,
+  Lock,
 } from 'lucide-react';
 import { playChime } from '../../utils/audio';
 
@@ -21,7 +22,7 @@ interface QRScannerModalProps {
 }
 
 export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose }) => {
-  const { tables, selectTableByNumber, activeTable, showToast, soundEnabled, isTableSelected } = useOrderContext();
+  const { tables, orders, selectTableByNumber, applyDiscountCode, activeTable, showToast, soundEnabled, isTableSelected } = useOrderContext();
 
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -75,7 +76,10 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose 
     try {
       if (raw.includes('?')) {
         const urlObj = new URL(raw.startsWith('http') ? raw : `http://localhost/${raw}`);
-        extractedNumber = urlObj.searchParams.get('table');
+        extractedNumber =
+          urlObj.searchParams.get('table') ||
+          urlObj.searchParams.get('tableNumber') ||
+          urlObj.searchParams.get('tableId');
       }
     } catch {
       // Ignore URL parse error
@@ -123,10 +127,41 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose 
     return matched || null;
   };
 
-  const handleSuccessfulScan = (matchedTable: Table) => {
+  const isTableNeedsCleaning = (tbl: Table): boolean => {
+    return tbl.status === 'cleaning';
+  };
+
+  const handleSuccessfulScan = (matchedTable: Table, rawQrData?: string) => {
+    if (isTableNeedsCleaning(matchedTable)) {
+      setUnrecognizedQrString(
+        `Table #${matchedTable.tableNumber} is currently being cleaned. Please wait a moment or scan another table.`
+      );
+      showToast(
+        `🧹 Table #${matchedTable.tableNumber} is currently being sanitized.`
+      );
+      if (soundEnabled) {
+        playChime('alert');
+      }
+      return;
+    }
+
+    const assigned = selectTableByNumber(matchedTable.tableNumber);
+    if (!assigned) return;
+
     stopCamera();
     setScannedTableSuccess(matchedTable);
-    selectTableByNumber(matchedTable.tableNumber);
+
+    if (rawQrData && rawQrData.includes('?')) {
+      try {
+        const urlObj = new URL(rawQrData.startsWith('http') ? rawQrData : `http://localhost/${rawQrData}`);
+        const promoParam = urlObj.searchParams.get('promo') || urlObj.searchParams.get('discount');
+        if (promoParam) {
+          applyDiscountCode(promoParam);
+        }
+      } catch {
+        // Ignore URL parse error
+      }
+    }
 
     if (soundEnabled) {
       playChime('order_ready');
@@ -167,7 +202,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose 
       if (code && code.data) {
         const matched = resolveTableFromQrString(code.data);
         if (matched) {
-          handleSuccessfulScan(matched);
+          handleSuccessfulScan(matched, code.data);
           return;
         } else {
           setUnrecognizedQrString(code.data);
@@ -303,7 +338,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose 
         if (code && code.data) {
           const matched = resolveTableFromQrString(code.data);
           if (matched) {
-            handleSuccessfulScan(matched);
+            handleSuccessfulScan(matched, code.data);
           } else {
             setUnrecognizedQrString(code.data);
             showToast(`QR scanned: "${code.data}", but no matching table registered.`);
@@ -501,18 +536,28 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose 
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1 scrollbar-none">
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1 scrollbar-none">
                   {tables.map(tbl => {
                     const isCurrent = isTableSelected && activeTable.tableNumber === tbl.tableNumber;
+                    const isCleaning = isTableNeedsCleaning(tbl);
+                    const hasOrder = orders.some(
+                      o =>
+                        (o.tableId === tbl.id || o.tableNumber === tbl.tableNumber) &&
+                        o.status !== 'completed' &&
+                        o.status !== 'cancelled'
+                    );
 
                     return (
                       <button
                         key={tbl.id}
+                        disabled={isCleaning}
                         onClick={() => handleSelectTableDirectly(tbl.tableNumber)}
-                        className={`flex items-center justify-between rounded-xl border p-2 text-left transition active:scale-95 ${
+                        className={`flex items-center justify-between rounded-xl border p-2 text-left transition ${
                           isCurrent
-                            ? 'border-emerald-500 bg-emerald-500/10 text-white'
-                            : 'border-slate-800 bg-slate-800/50 hover:border-slate-700 hover:bg-slate-800 text-slate-300'
+                            ? 'border-emerald-500 bg-emerald-500/10 text-white active:scale-95'
+                            : isCleaning
+                            ? 'border-rose-500/30 bg-rose-950/20 text-slate-500 opacity-55 cursor-not-allowed'
+                            : 'border-slate-800 bg-slate-800/50 hover:border-emerald-500/50 hover:bg-slate-800 text-slate-200 active:scale-95'
                         }`}
                       >
                         <div>
@@ -521,9 +566,17 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose 
                         </div>
                         {isCurrent ? (
                           <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                        ) : isCleaning ? (
+                          <span className="flex items-center gap-0.5 text-[9px] font-black uppercase text-rose-400 bg-rose-950/80 border border-rose-500/30 px-1.5 py-0.5 rounded">
+                            <Lock className="h-2.5 w-2.5" /> Cleaning
+                          </span>
+                        ) : hasOrder ? (
+                          <span className="text-[9px] font-extrabold text-amber-400 bg-amber-950/50 border border-amber-500/30 px-1.5 py-0.5 rounded">
+                            Re-open
+                          </span>
                         ) : (
-                          <span className="text-[9px] font-extrabold text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">
-                            Assign
+                          <span className="text-[9px] font-extrabold text-emerald-400 bg-slate-900 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                            Scan QR
                           </span>
                         )}
                       </button>

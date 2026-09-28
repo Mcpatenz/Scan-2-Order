@@ -1,6 +1,6 @@
 {
   "name": "QR Scan to Order App",
   "description": "Full-featured QR code ordering application with Customer Mobile App, Kitchen Display System (KDS), Cashier Dashboard, Admin Management, and real-time order tracking.",
-  "requestFramePermissions": ["camera"],
+  "requestFramePermissions": ["camera", "microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

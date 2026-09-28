@@ -58,12 +58,12 @@ export const getStatusMeta = (status: OrderStatus) => {
       };
     case 'ready':
       return {
-        label: 'Ready to Serve',
+        label: 'Ready for Pickup',
         icon: <Bell className="h-4 w-4 text-emerald-500 animate-bounce" />,
         badgeBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
         borderColor: 'border-emerald-500',
         gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent',
-        message: '🎉 Your order is hot and ready! Staff is bringing it to Table #',
+        message: '🎉 Your order is Ready for Pickup! Please proceed to the counter or await delivery at Table #',
       };
     case 'completed':
       return {

@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Product, CartItemModifier } from '../../types';
 import { useOrderContext } from '../../context/OrderContext';
-import { Plus, Minus, X, Flame, Clock, MessageSquare, Check, Sparkles } from 'lucide-react';
+import {
+  Plus,
+  Minus,
+  X,
+  Flame,
+  Clock,
+  MessageSquare,
+  Check,
+  AlertCircle,
+  Utensils,
+} from 'lucide-react';
 
 interface ProductModalProps {
   product: Product | null;
@@ -9,17 +19,30 @@ interface ProductModalProps {
   onClose: () => void;
 }
 
+const ALLERGY_AND_PREP_PRESETS = [
+  '🥜 No Peanuts / Tree Nuts',
+  '🥛 Dairy-Free',
+  '🌾 Gluten-Free',
+  '🦐 Shellfish Allergy',
+  '🧂 Less Salt',
+  '🥣 Sauce on the Side',
+  '🔥 Well Done',
+  '🌿 No Onions / Garlic',
+];
+
 export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose }) => {
   const { addToCart } = useOrderContext();
 
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedModifiers, setSelectedModifiers] = useState<CartItemModifier[]>([]);
   const [specialNotes, setSpecialNotes] = useState<string>('');
+  const [selectedPresets, setSelectedPresets] = useState<string[]>([]);
 
   useEffect(() => {
     if (product) {
       setQuantity(1);
       setSpecialNotes('');
+      setSelectedPresets([]);
 
       // Auto-select required modifier defaults if available
       const defaultMods: CartItemModifier[] = [];
@@ -51,13 +74,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
     price: number
   ) => {
     if (isRequired) {
-      // Replace existing selection in required group
       setSelectedModifiers(prev => [
         ...prev.filter(m => m.groupId !== groupId),
         { groupId, groupName, optionId, optionName, price },
       ]);
     } else {
-      // Toggle optional modifier
       setSelectedModifiers(prev => {
         const exists = prev.some(m => m.groupId === groupId && m.optionId === optionId);
         if (exists) {
@@ -73,31 +94,51 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
     return selectedModifiers.some(m => m.groupId === groupId && m.optionId === optionId);
   };
 
+  const togglePresetTag = (tag: string) => {
+    const cleanTag = tag.replace(/^[^\w]+/, '').trim();
+    setSelectedPresets(prev => {
+      const next = prev.includes(cleanTag)
+        ? prev.filter(t => t !== cleanTag)
+        : [...prev, cleanTag];
+      return next;
+    });
+  };
+
   // Calculate unit and total prices
   const modifierExtraCost = selectedModifiers.reduce((sum, m) => sum + m.price, 0);
   const unitPrice = product.price + modifierExtraCost;
   const totalPrice = unitPrice * quantity;
 
   const handleAddToCart = () => {
+    const combinedSpecialInstructions = [
+      selectedPresets.length > 0 ? `Allergies/Prefs: ${selectedPresets.join(', ')}` : '',
+      specialNotes.trim(),
+    ]
+      .filter(Boolean)
+      .join(' | ');
+
     addToCart({
       product,
       quantity,
       selectedModifiers,
-      notes: specialNotes.trim() || undefined,
+      notes: combinedSpecialInstructions || undefined,
     });
     onClose();
   };
 
-  const maxStock = product.stockQuantity !== undefined ? product.stockQuantity : (product.inStock ? 99 : 0);
+  const maxStock =
+    product.stockQuantity !== undefined ? product.stockQuantity : product.inStock ? 99 : 0;
   const isOutOfStock = !product.inStock || maxStock <= 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4">
       <div className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800 animate-slideUp">
-        
         {/* Top Header Controls */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Product Details
+            </span>
             {product.isPopular && !isOutOfStock && (
               <span className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
                 <Flame className="h-3.5 w-3.5" /> Popular Choice
@@ -107,7 +148,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
               <span className="flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-bold text-rose-600 dark:text-rose-400">
                 Out of Stock
               </span>
-            ) : product.stockQuantity !== undefined && product.stockQuantity <= (product.lowStockThreshold ?? 5) ? (
+            ) : product.stockQuantity !== undefined &&
+              product.stockQuantity <= (product.lowStockThreshold ?? 5) ? (
               <span className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
                 Only {product.stockQuantity} Left
               </span>
@@ -123,11 +165,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
 
         {/* Product Image */}
         <div className="relative my-4 aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="h-full w-full object-cover"
-          />
+          <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
           <div className="absolute bottom-2 left-2 flex gap-2">
             {product.calories && (
               <span className="rounded-lg bg-black/60 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-md">
@@ -161,14 +199,21 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
         {product.modifierGroups && product.modifierGroups.length > 0 && (
           <div className="mt-5 space-y-4">
             {product.modifierGroups.map(group => (
-              <div key={group.id} className="rounded-2xl border border-slate-100 bg-slate-50/50 p-3.5 dark:border-slate-800 dark:bg-slate-950/40">
+              <div
+                key={group.id}
+                className="rounded-2xl border border-slate-100 bg-slate-50/50 p-3.5 dark:border-slate-800 dark:bg-slate-950/40"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">
                     {group.name}
                   </h4>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    group.required ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                  }`}>
+                  <span
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                      group.required
+                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                        : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    }`}
+                  >
                     {group.required ? 'Required (Pick 1)' : 'Optional'}
                   </span>
                 </div>
@@ -197,9 +242,13 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <div className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                            selected ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 dark:border-slate-700'
-                          }`}>
+                          <div
+                            className={`flex h-4 w-4 items-center justify-center rounded-full border ${
+                              selected
+                                ? 'border-emerald-500 bg-emerald-500 text-white'
+                                : 'border-slate-300 dark:border-slate-700'
+                            }`}
+                          >
                             {selected && <Check className="h-3 w-3 stroke-[3]" />}
                           </div>
                           <span>{opt.name}</span>
@@ -218,18 +267,50 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
           </div>
         )}
 
-        {/* Special Instructions Note Input */}
-        <div className="mt-4">
-          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-            <MessageSquare className="h-3.5 w-3.5 text-slate-400" />
-            Special Kitchen Instructions:
-          </label>
-          <input
-            type="text"
-            placeholder="e.g., Less salt, extra sauce, allergy warnings..."
+        {/* Special Instructions Field (Allergies & Preparation Preferences) */}
+        <div className="mt-5 rounded-2xl border border-amber-500/25 bg-amber-500/5 p-3.5 space-y-3">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="product-special-instructions"
+              className="flex items-center gap-1.5 text-xs font-black text-slate-800 dark:text-slate-200"
+            >
+              <MessageSquare className="h-4 w-4 text-amber-500" />
+              <span>Special Instructions</span>
+            </label>
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+              <AlertCircle className="h-3 w-3" /> Allergies &amp; Prep Preferences
+            </span>
+          </div>
+
+          {/* Quick Allergy & Prep Preference Tags */}
+          <div className="flex flex-wrap gap-1.5">
+            {ALLERGY_AND_PREP_PRESETS.map(tag => {
+              const cleanTag = tag.replace(/^[^\w]+/, '').trim();
+              const isSelected = selectedPresets.includes(cleanTag);
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => togglePresetTag(tag)}
+                  className={`rounded-lg px-2.5 py-1 text-[10px] font-bold transition border ${
+                    isSelected
+                      ? 'border-amber-500 bg-amber-500 text-slate-950 shadow-2xs'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-amber-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300'
+                  }`}
+                >
+                  {tag}
+                </button>
+              );
+            })}
+          </div>
+
+          <textarea
+            id="product-special-instructions"
+            rows={2}
+            placeholder="Specify any food allergies (e.g. peanuts, dairy, gluten, shellfish) or custom preparation preferences for the kitchen..."
             value={specialNotes}
-            onChange={(e) => setSpecialNotes(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+            onChange={e => setSpecialNotes(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-white resize-none"
           />
         </div>
 
@@ -270,7 +351,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onC
             <span>₱{isOutOfStock ? '0.00' : totalPrice.toFixed(2)}</span>
           </button>
         </div>
-
       </div>
     </div>
   );
